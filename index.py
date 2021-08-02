@@ -124,5 +124,32 @@ async def inspect(ctx, *args):
             )
             return await ctx.send(embed=embed)
 
+#TODO: Do not hardcode the links
+@bot.command()
+async def links(ctx, *args):
+    """[Render important links]
+
+    Args:
+        ctx, *args: [context and tuple arguments]
+    """
+    if len(args) == 1:
+        if args[0] in ('tshoot', 'trouble', 'troubleshoot', 'ts'):
+            embed = discord.Embed(title="Troubleshooting Reference", description="https://github.com/containers/podman/blob/main/troubleshooting.md", color=0xE8E3E3)
+            return await ctx.send(embed=embed)
+        elif args[0] in ('git', 'github'):
+            embed = discord.Embed(title="GitHub", description="https://github.com/containers/podman", color=0xE8E3E3)
+            return await ctx.send(embed=embed)
+        elif args[0] in ('website', 'webpage', 'web'):
+            embed = discord.Embed(title="Official Website", description="https://podman.io/", color=0xE8E3E3)
+            return await ctx.send(embed=embed)
+        elif args[0] == 'issues':
+            embed = discord.Embed(title="GitHub Issues", description="https://github.com/containers/podman/issues", color=0xE8E3E3)
+            return await ctx.send(embed=embed)
+        elif args[0] in ('prs', 'PRS', 'PRs', 'PR', 'pulls'):
+            embed = discord.Embed(title="GitHub Pull Requests", description="https://github.com/containers/podman/pulls", color=0xE8E3E3)
+            return await ctx.send(embed=embed)
+    else:
+        return await ctx.reply("`Invalid Arguments`")
+        
 
 bot.run(config.TOKEN, bot=True, reconnect=True)
