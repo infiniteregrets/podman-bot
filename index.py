@@ -11,6 +11,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler, API
 from tweepy import Stream
 import threading
+import requests
 
 nest_asyncio.apply()
 
@@ -18,8 +19,26 @@ twitter_id = "1407427126710747142"
 
 
 class PodmanTweetStreamer(StreamListener):
-    def on_data(self, data):
-        print(data)
+    def on_data(self, tweet):
+        parsed_data = json.loads(tweet)
+        data = {
+            "username": "Podman",
+            "content": "@everyone",
+            "allowed_mentions": {"parse": ["everyone"]},
+            "author": {
+                "name": "Podman",
+                "icon_url": f"https://github.com/containers/podman/blob/main/logo/podman-logo.png",
+            },
+            "embeds": [
+                {
+                    "description": f"{parsed_data['text']}",
+                    "title": "Announcement from Podman",
+                    "footer": {"text": f"Posted at {parsed_data['created_at']}"},
+                }
+            ],
+        }
+
+        result = requests.post(config.WEBHOOK_URL, json=data)
         return True
 
     def on_error(self, status_code):
@@ -191,10 +210,13 @@ async def links(ctx, *args):
 
 
 def establish_twitter_connection():
+    global twitter_id
+
     listener = PodmanTweetStreamer()
     auth = OAuthHandler(config.API_TOKEN, config.API_TOKEN_SECRET)
     auth.set_access_token(config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
     stream = Stream(auth, listener)
+
     stream.filter(follow=[twitter_id])
 
 
