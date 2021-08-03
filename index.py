@@ -8,7 +8,7 @@ import nest_asyncio
 import json
 
 from tweepy.streaming import StreamListener
-from tweepy import OAuthHandler, API
+from tweepy import OAuthHandler
 from tweepy import Stream
 import threading
 import requests
@@ -27,7 +27,8 @@ class PodmanTweetStreamer(StreamListener):
             "allowed_mentions": {"parse": ["everyone"]},
             "author": {
                 "name": "Podman",
-                "icon_url": f"https://github.com/containers/podman/blob/main/logo/podman-logo.png",
+                "icon_url": "https://github.com/containers/podman/\
+                            blob/main/logo/podman-logo.png",
             },
             "embeds": [
                 {
@@ -38,7 +39,7 @@ class PodmanTweetStreamer(StreamListener):
             ],
         }
 
-        result = requests.post(config.WEBHOOK_URL, json=data)
+        requests.post(config.WEBHOOK_URL, json=data)
         return True
 
     def on_error(self, status_code):
@@ -77,7 +78,7 @@ async def docs(ctx, *args):
     try:
         session = AsyncHTMLSession()
         response = await session.get(query_url)
-    except:
+    except Exception:
         return await ctx.send("`Failed to Establish Connection. Try again Later!`")
     else:
         await response.html.arender(sleep=2)
