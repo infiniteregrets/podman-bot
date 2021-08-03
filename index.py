@@ -7,10 +7,27 @@ import config
 import nest_asyncio
 import json
 
+from tweepy.streaming import StreamListener
+from tweepy import OAuthHandler, API
+from tweepy import Stream
+import threading
+
 nest_asyncio.apply()
 
-called = False
-break_loop = False
+twitter_id = "1407427126710747142"
+
+
+class PodmanTweetStreamer(StreamListener):
+    def on_data(self, data):
+        print(data)
+        return True
+
+    def on_error(self, status_code):
+        if status_code == 420:
+            return False
+        return super().on_error(status_code)
+
+
 bot = commands.Bot(
     command_prefix=commands.when_mentioned_or(config.PREFIX),
     intents=discord.Intents.default(),
@@ -124,7 +141,8 @@ async def inspect(ctx, *args):
             )
             return await ctx.send(embed=embed)
 
-#TODO: Do not hardcode the links
+
+# TODO: Do not hardcode the links
 @bot.command()
 async def links(ctx, *args):
     """[Render important links]
@@ -133,23 +151,54 @@ async def links(ctx, *args):
         ctx, *args: [context and tuple arguments]
     """
     if len(args) == 1:
-        if args[0] in ('tshoot', 'trouble', 'troubleshoot', 'ts'):
-            embed = discord.Embed(title="Troubleshooting Reference", description="https://github.com/containers/podman/blob/main/troubleshooting.md", color=0xE8E3E3)
+        if args[0] in ("tshoot", "trouble", "troubleshoot", "ts"):
+            embed = discord.Embed(
+                title="Troubleshooting Reference",
+                description="https://github.com/containers/podman/blob/main/troubleshooting.md",
+                color=0xE8E3E3,
+            )
             return await ctx.send(embed=embed)
-        elif args[0] in ('git', 'github'):
-            embed = discord.Embed(title="GitHub", description="https://github.com/containers/podman", color=0xE8E3E3)
+        elif args[0] in ("git", "github"):
+            embed = discord.Embed(
+                title="GitHub",
+                description="https://github.com/containers/podman",
+                color=0xE8E3E3,
+            )
             return await ctx.send(embed=embed)
-        elif args[0] in ('website', 'webpage', 'web'):
-            embed = discord.Embed(title="Official Website", description="https://podman.io/", color=0xE8E3E3)
+        elif args[0] in ("website", "webpage", "web"):
+            embed = discord.Embed(
+                title="Official Website",
+                description="https://podman.io/",
+                color=0xE8E3E3,
+            )
             return await ctx.send(embed=embed)
-        elif args[0] == 'issues':
-            embed = discord.Embed(title="GitHub Issues", description="https://github.com/containers/podman/issues", color=0xE8E3E3)
+        elif args[0] == "issues":
+            embed = discord.Embed(
+                title="GitHub Issues",
+                description="https://github.com/containers/podman/issues",
+                color=0xE8E3E3,
+            )
             return await ctx.send(embed=embed)
-        elif args[0] in ('prs', 'PRS', 'PRs', 'PR', 'pulls'):
-            embed = discord.Embed(title="GitHub Pull Requests", description="https://github.com/containers/podman/pulls", color=0xE8E3E3)
+        elif args[0] in ("prs", "PRS", "PRs", "PR", "pulls"):
+            embed = discord.Embed(
+                title="GitHub Pull Requests",
+                description="https://github.com/containers/podman/pulls",
+                color=0xE8E3E3,
+            )
             return await ctx.send(embed=embed)
     else:
         return await ctx.reply("`Invalid Arguments`")
-        
 
-bot.run(config.TOKEN, bot=True, reconnect=True)
+
+def establish_twitter_connection():
+    listener = PodmanTweetStreamer()
+    auth = OAuthHandler(config.API_TOKEN, config.API_TOKEN_SECRET)
+    auth.set_access_token(config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
+    stream = Stream(auth, listener)
+    stream.filter(follow=[twitter_id])
+
+
+if __name__ == "__main__":
+    twitter_conn = threading.Thread(target=establish_twitter_connection)
+    twitter_conn.start()
+    bot.run(config.TOKEN, bot=True, reconnect=True)

@@ -7,6 +7,7 @@ name = "pypi"
 requests-html = "*"
 nest-asyncio = "*"
 discord-py = "*"
+tweepy = "*"
 
 [dev-packages]
 black = "*"
