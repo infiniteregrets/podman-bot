@@ -3,7 +3,6 @@ import discord
 from discord.ext import commands
 import aiohttp
 from requests_html import AsyncHTMLSession
-import config
 import nest_asyncio
 import json
 
@@ -12,6 +11,11 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 import threading
 import requests
+
+try:
+    import config
+except ModuleNotFoundError:
+    import example_config as config
 
 nest_asyncio.apply()
 
