@@ -1,6 +1,11 @@
 # Podman Discord Bot
 
-This is a cute little discord bot made for referring the Podman Docs and fetching information from the Docker Hub API. More features coming soon!
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+[![CircleCI](https://circleci.com/gh/infiniteregrets/podman-bot.svg?style=svg)](https://circleci.com/gh/infiniteregrets/podman-bot)
+
+This is a cute little discord bot made for referring the Podman Docs and fetching information from the Docker Hub API. 
+More features coming soon!
 
 ## Installing
 
@@ -9,6 +14,7 @@ This is a cute little discord bot made for referring the Podman Docs and fetchin
 ### Running in a container
 
 `docker build -t <TAG> .`
+
 `docker run <TAG>` or `docker run -it <TAG>`
 
 One can also use docker compose but I have not added the relevant files for that.
@@ -18,6 +24,7 @@ One can also use docker compose but I have not added the relevant files for that
 *Make sure your system has **chromium driver** installed.*
 
 `pipenv install`
+
 `pipenv run python3 index.py`
 
 Sometimes, some weird error might occur regarding your dependencies then you might wanna try running ` pipenv lock --pre --clear `.

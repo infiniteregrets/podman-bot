@@ -13,3 +13,8 @@ jobs:
           command: |
             pip3 install flake8
             python3 -m flake8 --statistics
+      - run:
+          name: black
+          command: |
+            pip3 install black
+            python3 -m black . --check
