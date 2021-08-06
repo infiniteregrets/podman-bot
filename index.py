@@ -5,6 +5,7 @@ import aiohttp
 from requests_html import AsyncHTMLSession
 import nest_asyncio
 import json
+import socket
 
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
@@ -20,6 +21,7 @@ except ModuleNotFoundError:
 nest_asyncio.apply()
 
 twitter_id = "1407427126710747142"
+sending = False
 
 
 class PodmanTweetStreamer(StreamListener):
@@ -225,7 +227,52 @@ def establish_twitter_connection():
     stream.filter(follow=[twitter_id])
 
 
+def establish_irc_connection():
+    ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ircsock.connect((config.SERVER, 6667))
+    ircsock.send(
+        bytes(
+            "USER "
+            + config.NICK
+            + " "
+            + config.NICK
+            + " "
+            + config.NICK
+            + " "
+            + config.NICK
+            + "\n",
+            encoding="utf8",
+        )
+    )
+    ircsock.send(bytes("NICK " + config.NICK + "\n", encoding="utf8"))
+    ircsock.send(bytes("JOIN " + config.CHANNEL + "\n", encoding="utf8"))
+
+    global sending
+    while True:
+        ircmsg = ircsock.recv(2048)
+        if b"/NAMES" in ircmsg:
+            sending = True
+            continue
+        if b"PING" in ircmsg:
+            ircsock.send(bytes("PONG :pong", encoding="utf8"))
+            continue
+        if b"JOIN" in ircmsg or b"QUIT" in ircmsg:
+            continue
+        if sending:
+            data = {"content": ircmsg.decode("utf-8")}
+
+            requests.post(config.IRC_WEBHOOK_URL, json=data)
+        print(ircmsg)
+
+
 if __name__ == "__main__":
     twitter_conn = threading.Thread(target=establish_twitter_connection)
     twitter_conn.start()
+
+    irc_conn = threading.Thread(target=establish_irc_connection)
+    irc_conn.start()
+
     bot.run(config.TOKEN, bot=True, reconnect=True)
+
+    twitter_conn.join()
+    irc_conn.join()
