@@ -9,11 +9,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: install dependencies
-          command: |
-            pip3 install pipenv
-            pipenv install
-      - run:
           name: flake8
           command: |
-            pipenv run python3 -m flake8 --statistics
+            pip3 install flake8
+            python3 -m flake8 --statistics
